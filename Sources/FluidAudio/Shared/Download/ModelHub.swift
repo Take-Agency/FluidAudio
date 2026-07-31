@@ -86,7 +86,7 @@ public enum ModelHub {
         _ repo: Repo,
         modelNames: [String],
         directory: URL,
-        computeUnits: MLComputeUnits = .cpuAndNeuralEngine,
+        computeUnits: MLComputeUnits = .fluidCpuAndNeuralEngine,
         variant: String? = nil,
         progressHandler: ProgressHandler? = nil
     ) async throws -> [String: MLModel] {
@@ -131,7 +131,7 @@ public enum ModelHub {
         _ repo: Repo,
         modelNames: [String],
         directory: URL,
-        computeUnits: MLComputeUnits = .cpuAndNeuralEngine,
+        computeUnits: MLComputeUnits = .fluidCpuAndNeuralEngine,
         variant: String? = nil,
         progressHandler: ProgressHandler? = nil
     ) async throws -> [String: MLModel] {

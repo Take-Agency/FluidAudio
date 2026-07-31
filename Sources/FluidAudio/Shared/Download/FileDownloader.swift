@@ -414,7 +414,7 @@ private final class StreamingDownloadDelegate: NSObject, URLSessionDataDelegate,
     private let onResponse: (@Sendable (HTTPURLResponse) -> Void)?
     // Holds the non-Sendable continuation and file handle; the lock (not
     // `@unchecked`) makes the delegate Sendable as URLSession requires.
-    private let state = OSAllocatedUnfairLock<State>(uncheckedState: State())
+    private let state = FluidUnfairLock<State>(uncheckedState: State())  // FORK: OSAllocatedUnfairLock is iOS 16+
 
     init(
         destination: URL,

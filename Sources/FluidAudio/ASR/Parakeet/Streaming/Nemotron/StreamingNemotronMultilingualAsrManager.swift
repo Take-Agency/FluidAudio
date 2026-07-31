@@ -684,7 +684,7 @@ public actor StreamingNemotronMultilingualAsrManager {
         let override: MLComputeUnits
         switch raw {
         case "CPU", "CPU_ONLY": override = .cpuOnly
-        case "CPU_AND_NE": override = .cpuAndNeuralEngine
+        case "CPU_AND_NE": override = .fluidCpuAndNeuralEngine
         case "CPU_AND_GPU": override = .cpuAndGPU
         case "ALL": override = .all
         default:
@@ -710,7 +710,7 @@ public actor StreamingNemotronMultilingualAsrManager {
         }
         guard !backings.isEmpty else { return nil }
         let options = MLPredictionOptions()
-        options.outputBackings = backings
+        options.fluidSetOutputBackings(backings)  // FORK: iOS 16+ setter shim
         return options
     }
 

@@ -685,24 +685,8 @@ public enum ModelNames {
                 }
             }
 
-            public var defaultConfiguration: SortformerConfig {
-                switch self {
-                case .fastV2:
-                    return .fastV2
-                case .fastV2_1:
-                    return .fastV2_1
-                case .balancedV2:
-                    return .balancedV2
-                case .balancedV2_1:
-                    return .balancedV2_1
-                case .highContextV2:
-                    return .highContextV2
-                case .highContextV2_1:
-                    return .highContextV2_1
-                case .efficientV2_1:
-                    return .efficientV2_1
-                }
-            }
+            // FORK: defaultConfiguration removed (SortformerConfig lives in the
+            // excluded Diarizer subsystem).
 
             /// Compiled-model path for this variant at the default (`.fp16`) precision.
             public var fileName: String {
@@ -714,9 +698,7 @@ public enum ModelNames {
                 return "\(precision.subdirectory)/\(name).mlmodelc"
             }
 
-            public func isCompatible(with config: SortformerConfig) -> Bool {
-                defaultConfiguration.isCompatible(with: config)
-            }
+            // FORK: isCompatible(with:) removed (SortformerConfig excluded).
         }
 
         /// Repo subdirectory holding the default (`.fp16`) model set. Both v3 sets are the
@@ -739,14 +721,7 @@ public enum ModelNames {
             return variant.fileName(precision: precision)
         }
 
-        /// Bundle name for a given configuration (honors `config.precision`)
-        public static func bundle(for config: SortformerConfig) -> String? {
-            guard let variant = config.modelVariant else {
-                return nil
-            }
-            assert(variant.isCompatible(with: config), "ERROR: Model variant and configuration are not compatible.")
-            return variant.fileName(precision: config.precision)
-        }
+        // FORK: bundle(for config:) removed (SortformerConfig excluded).
 
         /// Default bundle name
         public static var defaultBundle: String {
@@ -902,57 +877,9 @@ public enum ModelNames {
         /// Directory containing binary constants, tokenizer, and voice data.
         public static let constantsBinDir = "constants_bin"
 
-        /// FlowLM filename for a given precision. Both variants ship in the
-        /// same `v2/<lang>/` directory upstream; only the FlowLM transformer
-        /// has an int8 variant — `cond_step`, `flow_decoder`, and
-        /// `mimi_decoder` always load the default file.
-        public static func flowlmStepFile(precision: PocketTtsPrecision) -> String {
-            switch precision {
-            case .fp16: return flowlmStepFile
-            case .int8: return flowlmStepV2File
-            }
-        }
-
-        /// Required files inside any language's `v2/<lang>/` pack for the
-        /// given precision. The set differs only in the FlowLM filename.
-        public static func requiredModels(precision: PocketTtsPrecision) -> Set<String> {
-            requiredModels(precision: precision, placement: .gpu)
-        }
-
-        /// Required files for a precision + placement combination. `.ane`
-        /// swaps the rank-5 conditioner/FlowLM for the rank-4 ANE-eligible
-        /// variants (fp16 only — `precision` does not affect the ANE set).
-        public static func requiredModels(
-            precision: PocketTtsPrecision,
-            placement: PocketTtsModelPlacement
-        ) -> Set<String> {
-            switch placement {
-            case .gpu:
-                return [
-                    condPrefillFile,
-                    flowlmStepFile(precision: precision),
-                    flowDecoderFusedFile,
-                    mimiDecoderFile,
-                    constantsBinDir,
-                ]
-            case .ane:
-                return [
-                    condPrefillAneFile,
-                    flowlmStepAneFile,
-                    flowDecoderFusedFile,
-                    mimiDecoderFile,
-                    constantsBinDir,
-                ]
-            case .aneState:
-                // The multifunction package fuses conditioner + FlowLM +
-                // flow decoder; only mimi stays a separate model.
-                return [
-                    pocketStateFile,
-                    mimiDecoderFile,
-                    constantsBinDir,
-                ]
-            }
-        }
+        // FORK: precision/placement-parameterized helpers removed
+        // (PocketTtsPrecision/PocketTtsModelPlacement live in the excluded
+        // TTS subsystem).
 
         /// Required files for the default precision. Kept for callers that
         /// haven't been updated to pass a precision argument.

@@ -17,7 +17,7 @@ public enum SenseVoiceEncoderPrecision: String, Sendable {
     }
 
     var computeUnits: MLComputeUnits {
-        self == .fp32 ? .all : .cpuAndNeuralEngine
+        self == .fp32 ? .all : .fluidCpuAndNeuralEngine
     }
 }
 

@@ -98,9 +98,11 @@ public enum ANEMemoryUtils {
 
     /// Get element size in bytes for a given data type
     public static func getElementSize(for dataType: MLMultiArrayDataType) -> Int {
-        switch dataType {
-        case .float16:
+        // FORK: .float16 (iOS 16+) cannot be pattern-matched at iOS 15.
+        if dataType.fluidIsFloat16 {
             return 2
+        }
+        switch dataType {
         case .float32, .float:
             return 4
         case .float64, .double:
@@ -152,7 +154,7 @@ public enum ANEMemoryUtils {
 
         let float16Array = try createAlignedArray(
             shape: input.shape,
-            dataType: .float16,
+            dataType: .fluidFloat16,  // FORK
             zeroClear: false
         )
 

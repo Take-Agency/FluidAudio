@@ -243,8 +243,10 @@ extension CtcKeywordSpotter {
         let expectedRank = audioDesc?.multiArrayConstraint?.shape.count ?? 1
 
         // Determine data type - prefer float16 if model expects it, otherwise float32
+        // FORK: .float16 is iOS 16+; .fluidFloat16 degrades to .float32 at compile
+        // floor iOS 15 (never executed there — Parakeet is iOS 17-gated).
         let dataType: MLMultiArrayDataType =
-            audioDesc?.multiArrayConstraint?.dataType == .float16 ? .float16 : .float32
+            audioDesc?.multiArrayConstraint?.dataType == .fluidFloat16 ? .fluidFloat16 : .float32
 
         let array: MLMultiArray
         if expectedRank == 2 {
@@ -306,7 +308,7 @@ extension CtcKeywordSpotter {
         ]
 
         // Optional placeholder accepted by some staged exports.
-        if let input1 = try? MLMultiArray(shape: [1, 1, 1, 1], dataType: .float16) {
+        if let input1 = try? MLMultiArray(shape: [1, 1, 1, 1], dataType: .fluidFloat16) {
             input1[0] = 1
             dict["input_1"] = MLFeatureValue(multiArray: input1)
         }

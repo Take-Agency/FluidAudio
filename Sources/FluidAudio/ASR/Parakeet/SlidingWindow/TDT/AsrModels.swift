@@ -440,18 +440,21 @@ extension AsrModels {
             return "cpuOnly"
         case .cpuAndGPU:
             return "cpuAndGPU"
-        case .cpuAndNeuralEngine:
-            return "cpuAndNeuralEngine"
         case .all:
             return "all"
-        @unknown default:
+        default:
+            // FORK: .cpuAndNeuralEngine (iOS 16+) can't be pattern-matched at
+            // an iOS 15 deployment target; identify it by comparison.
+            if units == .fluidCpuAndNeuralEngine {
+                return "cpuAndNeuralEngine"
+            }
             return "unknown(\(units.rawValue))"
         }
     }
 
     public static func defaultConfiguration() -> MLModelConfiguration {
         // Prefer Neural Engine across platforms for ASR inference to avoid GPU dispatch.
-        MLModelConfigurationUtils.defaultConfiguration(computeUnits: .cpuAndNeuralEngine)
+        MLModelConfigurationUtils.defaultConfiguration(computeUnits: .fluidCpuAndNeuralEngine)
     }
 
     /// Create optimized configuration for model inference
@@ -460,7 +463,7 @@ extension AsrModels {
     ) -> MLModelConfiguration {
         let isCI = ProcessInfo.processInfo.environment["CI"] != nil
         let config = MLModelConfigurationUtils.defaultConfiguration(
-            computeUnits: isCI ? .cpuOnly : .cpuAndNeuralEngine
+            computeUnits: isCI ? .cpuOnly : .fluidCpuAndNeuralEngine
         )
         config.allowLowPrecisionAccumulationOnGPU = enableFP16
         return config
@@ -471,7 +474,7 @@ extension AsrModels {
         let options = MLPredictionOptions()
 
         // Enable batching for better GPU utilization
-        options.outputBackings = [:]  // Reuse output buffers
+        options.fluidSetOutputBackings([:])  // Reuse output buffers (FORK: iOS 16+ setter shim)
 
         return options
     }

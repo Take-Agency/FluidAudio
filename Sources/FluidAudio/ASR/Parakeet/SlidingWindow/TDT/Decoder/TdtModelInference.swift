@@ -44,10 +44,10 @@ internal struct TdtModelInference: Sendable {
 
         // Reuse decoder state output buffers to avoid CoreML allocating new ones
         // Note: outputBackings expects raw backing objects (MLMultiArray / CVPixelBuffer)
-        predictionOptions.outputBackings = [
+        predictionOptions.fluidSetOutputBackings([  // FORK: iOS 16+ setter shim
             "h_out": state.hiddenState,
             "c_out": state.cellState,
-        ]
+        ])
 
         let output = try model.prediction(
             from: input,
@@ -104,11 +104,11 @@ internal struct TdtModelInference: Sendable {
         preparedDecoderStep.prefetchToNeuralEngine()
 
         // Reuse tiny output tensors for joint prediction (provide raw MLMultiArray backings)
-        predictionOptions.outputBackings = [
+        predictionOptions.fluidSetOutputBackings([  // FORK: iOS 16+ setter shim
             "token_id": tokenIdBacking,
             "token_prob": tokenProbBacking,
             "duration": durationBacking,
-        ]
+        ])
 
         // Execute joint network using the reusable provider
         let output = try model.prediction(

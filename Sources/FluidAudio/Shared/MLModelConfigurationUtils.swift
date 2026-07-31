@@ -9,7 +9,7 @@ public enum MLModelConfigurationUtils {
     /// - Parameter computeUnits: Compute units to use (default: `.cpuAndNeuralEngine`).
     /// - Returns: Configured `MLModelConfiguration`.
     public static func defaultConfiguration(
-        computeUnits: MLComputeUnits = .cpuAndNeuralEngine
+        computeUnits: MLComputeUnits = .fluidCpuAndNeuralEngine
     ) -> MLModelConfiguration {
         let config = MLModelConfiguration()
         config.allowLowPrecisionAccumulationOnGPU = true

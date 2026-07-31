@@ -202,7 +202,7 @@ final public class AudioConverter: Sendable {
             throw AudioConverterError.failedToCreateBuffer
         }
 
-        let provided = OSAllocatedUnfairLock(initialState: false)
+        let provided = FluidUnfairLock(initialState: false)
         let inputBlock: AVAudioConverterInputBlock = { _, status in
             let wasProvided = provided.withLock { state -> Bool in
                 if state { return true }
@@ -309,7 +309,7 @@ final public class AudioConverter: Sendable {
 
         // AVAudioConverter consumes this input block synchronously within convert(...),
         // but Swift 6 rejects mutation of captured vars in this callback.
-        let provided = OSAllocatedUnfairLock(initialState: false)
+        let provided = FluidUnfairLock(initialState: false)
         let inputBlock: AVAudioConverterInputBlock = { _, status in
             let wasProvided = provided.withLock { state -> Bool in
                 if state { return true }

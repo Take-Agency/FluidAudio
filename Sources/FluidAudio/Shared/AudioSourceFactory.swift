@@ -122,8 +122,8 @@ public struct AudioSourceFactory {
         }
 
         var totalSamples = 0
-        let inputComplete = OSAllocatedUnfairLock(initialState: false)
-        let readError = OSAllocatedUnfairLock<Error?>(initialState: nil)
+        let inputComplete = FluidUnfairLock(initialState: false)
+        let readError = FluidUnfairLock<Error?>(initialState: nil)
 
         // Buffer is only accessed synchronously by AVAudioConverter's input block callback
         nonisolated(unsafe) let capturedInputBuffer = inputBuffer

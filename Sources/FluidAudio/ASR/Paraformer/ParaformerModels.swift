@@ -84,7 +84,7 @@ public struct ParaformerModels: Sendable {
         let cpu = MLModelConfiguration()
         cpu.computeUnits = .cpuOnly
         let ane = MLModelConfiguration()
-        ane.computeUnits = .cpuAndNeuralEngine
+        ane.computeUnits = .fluidCpuAndNeuralEngine
 
         let pre = try loadModel(named: ModelNames.ParaformerZh.preprocessor, from: directory, configuration: cpu)
         let enc = try loadModel(named: precision.encoderName, from: directory, configuration: ane)

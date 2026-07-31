@@ -53,14 +53,15 @@ struct NemotronMelExtractor {
 
         let melArray = try MLMultiArray(
             shape: [1, NSNumber(value: nMels), NSNumber(value: totalFrames)], dataType: .float32)
-        melArray.withUnsafeMutableBufferPointer(ofType: Float.self) { ptr, _ in
-            // Contiguous [1, nMels, T]: element [0, m, t] is at offset m*T + t,
-            // sourced from the time-major flat buffer at t*nMels + m.
-            for t in 0..<totalFrames {
-                let base = t * nMels
-                for m in 0..<nMels {
-                    ptr[m * totalFrames + t] = flat[base + m]
-                }
+        // FORK: withUnsafeMutableBufferPointer(ofType:) is iOS 15.4+; use the
+        // equivalent raw dataPointer path so the file compiles at iOS 15.0.
+        let ptr = melArray.dataPointer.bindMemory(to: Float.self, capacity: nMels * totalFrames)
+        // Contiguous [1, nMels, T]: element [0, m, t] is at offset m*T + t,
+        // sourced from the time-major flat buffer at t*nMels + m.
+        for t in 0..<totalFrames {
+            let base = t * nMels
+            for m in 0..<nMels {
+                ptr[m * totalFrames + t] = flat[base + m]
             }
         }
         return melArray

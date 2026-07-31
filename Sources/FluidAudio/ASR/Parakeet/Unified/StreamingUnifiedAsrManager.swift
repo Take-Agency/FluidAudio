@@ -95,7 +95,7 @@ public actor StreamingUnifiedAsrManager {
         let encoderConfig: MLModelConfiguration
         if encoderPrecision == .int8, mlConfiguration.computeUnits == .all {
             encoderConfig = MLModelConfiguration()
-            encoderConfig.computeUnits = .cpuAndNeuralEngine
+            encoderConfig.computeUnits = .fluidCpuAndNeuralEngine
         } else {
             encoderConfig = mlConfiguration
         }
