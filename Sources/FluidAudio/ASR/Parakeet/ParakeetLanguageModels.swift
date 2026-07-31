@@ -253,7 +253,7 @@ extension ParakeetLanguageModels {
 
     /// Default CoreML configuration for inference.
     public static func defaultConfiguration() -> MLModelConfiguration {
-        MLModelConfigurationUtils.defaultConfiguration(computeUnits: .cpuAndNeuralEngine)
+        MLModelConfigurationUtils.defaultConfiguration(computeUnits: .fluidCpuAndNeuralEngine)  // FORK: iOS 16+ API shim
     }
 
     /// Check whether required model bundles and vocabulary exist at a directory.

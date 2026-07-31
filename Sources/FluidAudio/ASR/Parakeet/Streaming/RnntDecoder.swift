@@ -51,7 +51,7 @@ public final class RnntDecoder {
         // fused model emits fp16 h_out/c_out).
         let array = try! MLMultiArray(
             shape: [NSNumber(value: layers), NSNumber(value: 1), NSNumber(value: hiddenSize)], dataType: .float32)
-        array.withUnsafeMutableBufferPointer(ofType: Float.self) { ptr, _ in
+        array.fluidWithUnsafeMutableBufferPointer(ofType: Float.self) { ptr, _ in  // FORK: iOS 15.4+ API shim
             ptr.baseAddress?.update(repeating: 0, count: ptr.count)
         }
         return array

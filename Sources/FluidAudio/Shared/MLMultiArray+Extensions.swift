@@ -15,7 +15,7 @@ extension MLMultiArray {
     /// compared as an `NSNumber`, so `-0.0` takes the zero path and lands as `+0.0`.
     func resetData(to value: NSNumber) {
         let elementSize = ANEMemoryUtils.getElementSize(for: dataType)
-        let filled = withUnsafeMutableBytes { bytes, _ -> Bool in
+        let filled = fluidWithUnsafeMutableBytes { bytes, _ -> Bool in  // FORK: iOS 15.4+ API shim
             guard bytes.count == count * elementSize, let base = bytes.baseAddress else {
                 return false
             }
@@ -51,11 +51,11 @@ extension MLMultiArray {
     func copyData(from source: MLMultiArray) {
         let elementSize = ANEMemoryUtils.getElementSize(for: dataType)
         if dataType == source.dataType, shape == source.shape, strides == source.strides {
-            let copied = withUnsafeMutableBytes { destination, _ -> Bool in
+            let copied = fluidWithUnsafeMutableBytes { destination, _ -> Bool in  // FORK: iOS 15.4+ API shim
                 guard destination.count == count * elementSize else {
                     return false
                 }
-                source.withUnsafeBytes { destination.copyMemory(from: $0) }
+                source.fluidWithUnsafeBytes { destination.copyMemory(from: $0) }  // FORK: iOS 15.4+ API shim
                 return true
             }
             if copied {

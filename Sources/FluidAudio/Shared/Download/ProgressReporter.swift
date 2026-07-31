@@ -119,7 +119,7 @@ final class ConcurrentProgress: Sendable {
         var maxFraction = 0.0
     }
 
-    private let state = OSAllocatedUnfairLock<Counters>(initialState: Counters())
+    private let state = FluidUnfairLock<Counters>(initialState: Counters())  // FORK: OSAllocatedUnfairLock is iOS 16+
     private let reporter: ProgressReporter
     private let totalBytes: Int64
     private let totalFiles: Int

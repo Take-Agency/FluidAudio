@@ -867,15 +867,7 @@ public enum ModelNames {
         public static let projectionFile = projection + ".mlmodelc"
         public static let vocabularyFile = "vocab.json"
 
-        public static func requiredModels(precision: CanaryPrecision = .int4) -> Set<String> {
-            [
-                preprocessorFile,
-                projectionFile,
-                precision.encoderName + ".mlmodelc",
-                precision.decoderName + ".mlmodelc",
-                vocabularyFile,
-            ]
-        }
+        // FORK: requiredModels(precision:) removed (CanaryPrecision lives in the excluded ASR/Canary).
     }
 
     /// Paraformer-large (zh) model names. 4 CoreML stages + host CIF:
@@ -955,34 +947,8 @@ public enum ModelNames {
     /// `localvqe-v1.3-4.8M-256ms.mlmodelc`. The download variant key
     /// (`"v1.3-256ms"`) narrows the required set to that single file.
     public enum LocalVQE {
-        public static func modelFile(variant: LocalVqeVariant, chunk: LocalVqeChunk) -> String {
-            "\(variant.fileStem)-\(chunk.rawValue).mlmodelc"
-        }
-
-        public static func variantKey(variant: LocalVqeVariant, chunk: LocalVqeChunk) -> String {
-            "\(variant.rawValue)-\(chunk.rawValue)"
-        }
-
-        public static var allModels: Set<String> {
-            var files: Set<String> = []
-            for variant in LocalVqeVariant.allCases {
-                for chunk in LocalVqeChunk.allCases {
-                    files.insert(modelFile(variant: variant, chunk: chunk))
-                }
-            }
-            return files
-        }
-
-        /// Required files for a download variant key; the full set when the
-        /// key is absent or unrecognised.
-        public static func requiredModels(variant: String?) -> Set<String> {
-            for v in LocalVqeVariant.allCases {
-                for c in LocalVqeChunk.allCases where variantKey(variant: v, chunk: c) == variant {
-                    return [modelFile(variant: v, chunk: c)]
-                }
-            }
-            return allModels
-        }
+        // FORK: modelFile/variantKey/allModels/requiredModels(variant:) removed (LocalVqeVariant and
+        // LocalVqeChunk live in the excluded Enhancement subsystem).
     }
 
     /// Parakeet EOU streaming model names
@@ -1490,57 +1456,8 @@ public enum ModelNames {
         /// per language (#793).
         public static let encoderRecoverPinvFile = "encoder_recover_pinv.bin"
 
-        /// FlowLM filename for a given precision. Both variants ship in the
-        /// same `v2/<lang>/` directory upstream; only the FlowLM transformer
-        /// has an int8 variant — `cond_step`, `flow_decoder`, and
-        /// `mimi_decoder` always load the default file.
-        public static func flowlmStepFile(precision: PocketTtsPrecision) -> String {
-            switch precision {
-            case .fp16: return flowlmStepFile
-            case .int8: return flowlmStepV2File
-            }
-        }
-
-        /// Required files inside any language's `v2/<lang>/` pack for the
-        /// given precision. The set differs only in the FlowLM filename.
-        public static func requiredModels(precision: PocketTtsPrecision) -> Set<String> {
-            requiredModels(precision: precision, placement: .gpu)
-        }
-
-        /// Required files for a precision + placement combination. `.ane`
-        /// swaps the rank-5 conditioner/FlowLM for the rank-4 ANE-eligible
-        /// variants (fp16 only — `precision` does not affect the ANE set).
-        public static func requiredModels(
-            precision: PocketTtsPrecision,
-            placement: PocketTtsModelPlacement
-        ) -> Set<String> {
-            switch placement {
-            case .gpu:
-                return [
-                    condPrefillFile,
-                    flowlmStepFile(precision: precision),
-                    flowDecoderFusedFile,
-                    mimiDecoderFile,
-                    constantsBinDir,
-                ]
-            case .ane:
-                return [
-                    condPrefillAneFile,
-                    flowlmStepAneFile,
-                    flowDecoderFusedFile,
-                    mimiDecoderFile,
-                    constantsBinDir,
-                ]
-            case .aneState:
-                // The multifunction package fuses conditioner + FlowLM +
-                // flow decoder; only mimi stays a separate model.
-                return [
-                    pocketStateFile,
-                    mimiDecoderFile,
-                    constantsBinDir,
-                ]
-            }
-        }
+        // FORK: precision/placement-parameterized helpers removed (PocketTtsPrecision and
+        // PocketTtsModelPlacement live in the excluded TTS subsystem).
 
         /// Required files for the default precision. Kept for callers that
         /// haven't been updated to pass a precision argument.
@@ -2053,16 +1970,8 @@ public enum ModelNames {
             flowFile,
             vocoderFile,
         ]
-        /// Required model set for an output capacity ("extended" swaps in
-        /// the N1000/T2000 S3Gen pair).
-        public static func requiredModels(capacity: ChatterboxNanoOutputCapacity) -> Set<String> {
-            switch capacity {
-            case .standard:
-                return requiredModels
-            case .extended:
-                return [prefillFile, decodeFile, flowFileExtended, vocoderFileExtended]
-            }
-        }
+        // FORK: requiredModels(capacity:) removed (ChatterboxNanoOutputCapacity lives in the excluded
+        // TTS subsystem).
         /// Non-model assets fetched individually (nested under `tables/` and
         /// `tokenizer/`, which the repo-root model walk does not descend into).
         public static let auxFiles: [String] = [
@@ -2092,7 +2001,7 @@ public enum ModelNames {
         case .vad:
             return ModelNames.VAD.requiredModels
         case .localVqe:
-            return ModelNames.LocalVQE.requiredModels(variant: variant)
+            return []  // FORK: LocalVQE (Enhancement) is excluded
         case .parakeetV3:
             let precision = ParakeetEncoderPrecision(rawValue: variant ?? "") ?? .int8
             return ModelNames.ASR.requiredModelsV3(precision: precision)
@@ -2178,8 +2087,7 @@ public enum ModelNames {
             default: return ModelNames.CohereTranscribe.requiredModels
             }
         case .canary1bV2:
-            return ModelNames.Canary.requiredModels(
-                precision: CanaryPrecision(rawValue: variant ?? "") ?? .int4)
+            return []  // FORK: ASR/Canary is excluded
         case .styletts2:
             // Sentinel variants:
             //   "all"     → 14 bundles (8 defaults + 6 buckets)
@@ -2204,9 +2112,7 @@ public enum ModelNames {
         case .chatterbox:
             return ModelNames.Chatterbox.requiredModels
         case .chatterboxNano:
-            // Variant: "extended" → N1000/T2000 S3Gen bucket pair (~30 s).
-            let capacity = ChatterboxNanoOutputCapacity(rawValue: variant ?? "") ?? .standard
-            return ModelNames.ChatterboxNano.requiredModels(capacity: capacity)
+            return ModelNames.ChatterboxNano.requiredModels  // FORK: TTS excluded (no capacity variants)
         case .luxtts:
             // Variants: "gpu" (macOS) / "ane" (iOS); nil → platform default.
             return ModelNames.LuxTts.requiredFiles(variant: variant)

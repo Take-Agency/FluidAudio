@@ -78,7 +78,7 @@ extension StreamingNemotronMultilingualAsrManager {
         let encProjStride2 = encoderProj.strides[2].intValue
 
         // encProj may be fp16 on ANE; convert per-element when copying.
-        let encProjIsF16 = (encoderProj.dataType == .float16)
+        let encProjIsF16 = encoderProj.dataType.fluidIsFloat16  /* FORK */
         let srcF16Ptr: UnsafeMutablePointer<UInt16>? =
             encProjIsF16
             ? encoderProj.dataPointer.bindMemory(to: UInt16.self, capacity: encoderProj.count)
@@ -176,7 +176,7 @@ extension StreamingNemotronMultilingualAsrManager {
             let logitsStride2 = logits.strides[2].intValue
             let logitsStride3 = logits.strides[3].intValue
             let vocabSize = logits.shape[3].intValue
-            let logitsIsF16 = (logits.dataType == .float16)
+            let logitsIsF16 = logits.dataType.fluidIsFloat16  /* FORK */
             let logitsF16Ptr: UnsafeMutablePointer<UInt16>? =
                 logitsIsF16
                 ? logits.dataPointer.bindMemory(to: UInt16.self, capacity: logits.count)
@@ -481,7 +481,7 @@ extension StreamingNemotronMultilingualAsrManager {
             return bestIdx
         }
 
-        if logits.dataType == .float16 {
+        if logits.dataType.fluidIsFloat16 {  // FORK
             // x86_64 has no `Float16: Comparable`; scan the raw UInt16 bits and
             // convert each candidate to Float for the max. (arm64 path is
             // unchanged numerically — same native conversion under the hood.)

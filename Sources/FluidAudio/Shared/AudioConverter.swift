@@ -40,7 +40,7 @@ final public class AudioConverter: Sendable {
     private let debug: Bool
     /// Building a mastering-quality converter costs about as much as converting a short buffer.
     /// A converter is checked out for each call, so concurrent callers never share one.
-    private let cachedConverter = OSAllocatedUnfairLock<AVAudioConverter?>(uncheckedState: nil)
+    private let cachedConverter = FluidUnfairLock<AVAudioConverter?>(uncheckedState: nil)  // FORK: OSAllocatedUnfairLock is iOS 16+
 
     /// Public initializer so external modules (e.g. CLI) can construct the converter
     /// - Parameters:
@@ -209,8 +209,8 @@ final public class AudioConverter: Sendable {
 
         // The converter pulls input synchronously inside convert(...); the
         // reader's state is only touched from there.
-        let ended = OSAllocatedUnfairLock(initialState: false)
-        let readError = OSAllocatedUnfairLock<Error?>(initialState: nil)
+        let ended = FluidUnfairLock(initialState: false)  // FORK: OSAllocatedUnfairLock is iOS 16+
+        let readError = FluidUnfairLock<Error?>(initialState: nil)  // FORK: OSAllocatedUnfairLock is iOS 16+
         nonisolated(unsafe) let input = inputBuffer
         nonisolated(unsafe) let read = readChunk
         let inputBlock: AVAudioConverterInputBlock = { _, status in
@@ -347,8 +347,8 @@ final public class AudioConverter: Sendable {
 
         // The converter pulls input synchronously inside convert(...); the
         // feed's state is only touched from there.
-        let ended = OSAllocatedUnfairLock(initialState: false)
-        let feedError = OSAllocatedUnfairLock<Error?>(initialState: nil)
+        let ended = FluidUnfairLock(initialState: false)  // FORK: OSAllocatedUnfairLock is iOS 16+
+        let feedError = FluidUnfairLock<Error?>(initialState: nil)  // FORK: OSAllocatedUnfairLock is iOS 16+
         nonisolated(unsafe) let input = inputBuffer
         nonisolated(unsafe) let feed = nextChunk
         let inputBlock: AVAudioConverterInputBlock = { _, status in
@@ -478,7 +478,7 @@ final public class AudioConverter: Sendable {
 
         // AVAudioConverter consumes this input block synchronously within convert(...),
         // but Swift 6 rejects mutation of captured vars in this callback.
-        let provided = OSAllocatedUnfairLock(initialState: false)
+        let provided = FluidUnfairLock(initialState: false)  // FORK: OSAllocatedUnfairLock is iOS 16+
         let inputBlock: AVAudioConverterInputBlock = { _, status in
             let wasProvided = provided.withLock { state -> Bool in
                 if state { return true }

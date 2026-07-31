@@ -125,9 +125,10 @@ extension CtcModels {
         switch config.computeUnits {
         case .cpuOnly: computeUnitsStr = "cpuOnly"
         case .cpuAndGPU: computeUnitsStr = "cpuAndGPU"
-        case .cpuAndNeuralEngine: computeUnitsStr = "cpuAndNeuralEngine"
         case .all: computeUnitsStr = "all"
-        @unknown default: computeUnitsStr = "unknown"
+        // FORK: .cpuAndNeuralEngine (iOS 16+) can't be pattern-matched at an
+        // iOS 15 deployment target; identify it by comparison.
+        default: computeUnitsStr = config.computeUnits == .fluidCpuAndNeuralEngine ? "cpuAndNeuralEngine" : "unknown"
         }
         logger.info("CTC encoder loaded with computeUnits: \(computeUnitsStr) (MelSpectrogram: cpuOnly)")
 
@@ -293,7 +294,7 @@ extension CtcModels {
 
     /// Default CoreML configuration for CTC inference (the audio encoder).
     public static func defaultConfiguration() -> MLModelConfiguration {
-        MLModelConfigurationUtils.defaultConfiguration(computeUnits: .cpuAndNeuralEngine)
+        MLModelConfigurationUtils.defaultConfiguration(computeUnits: .fluidCpuAndNeuralEngine)  // FORK: iOS 16+ API shim
     }
 
     /// CoreML configuration for the `MelSpectrogram` front end: CPU only, like the standalone preprocessors of

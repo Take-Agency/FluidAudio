@@ -27,7 +27,7 @@ public struct AppLogger: Sendable {
         var mirrorsToConsole: Bool = true
     }
 
-    private static let configuration = OSAllocatedUnfairLock(initialState: Configuration())
+    private static let configuration = FluidUnfairLock(initialState: Configuration())  // FORK: OSAllocatedUnfairLock is iOS 16+
 
     /// Messages below this level are dropped from every sink (console and unified log).
     /// Defaults to `.debug`. Set once at startup, e.g. `.warning` to keep ASR debug

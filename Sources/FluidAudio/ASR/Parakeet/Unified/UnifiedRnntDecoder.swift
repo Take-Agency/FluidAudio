@@ -57,8 +57,8 @@ final class UnifiedRnntDecoder {
         targetLength[0] = 1
         self.workH = try Self.zeroState(config: config)
         self.workC = try Self.zeroState(config: config)
-        decoderOptions.outputBackings = try Self.outputBuffers(for: decoderModel)
-        jointOptions.outputBackings = try Self.outputBuffers(for: jointDecisionModel)
+        decoderOptions.fluidSetOutputBackings(try Self.outputBuffers(for: decoderModel))  // FORK: iOS 16+ setter shim
+        jointOptions.fluidSetOutputBackings(try Self.outputBuffers(for: jointDecisionModel))  // FORK: iOS 16+ setter shim
     }
 
     /// One buffer per multi-array output, shaped and typed as the model declares it.
